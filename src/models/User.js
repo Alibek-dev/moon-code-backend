@@ -1,6 +1,7 @@
 const db = require('../modules/connectionDB')
 const DataTypes = require('sequelize')
 const Task = require('./Task')
+const Test = require('./Test')
 
 const User = db.define('user', {
     username: {type: DataTypes.STRING, unique: true, required: true},
@@ -11,6 +12,9 @@ const User = db.define('user', {
 })
 
 User.hasMany(Task, {
+    onDelete: 'cascade'
+})
+User.hasMany(Test, {
     onDelete: 'cascade'
 })
 
