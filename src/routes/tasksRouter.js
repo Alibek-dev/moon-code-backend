@@ -20,7 +20,7 @@ router.put('/task', [
     check("outputDataText", "Условие выходных данных не должно быть пустым").trim().notEmpty(),
     validationMiddleware
 ], TaskController.updateTask)
-router.delete('/task/')
+router.delete('/task/', TaskController.deleteTask)
 
 module.exports = router
 

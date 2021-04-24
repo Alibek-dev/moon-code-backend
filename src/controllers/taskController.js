@@ -5,9 +5,7 @@ class TaskController {
         try {
             const { text, inputDataText, outputDataText } = req.body
             const candidate = await Task.findOne({where: {text}})
-            if (candidate) {
-                return res.status(400).json({message: "Данная задача уже существует"})
-            }
+            if (candidate) return res.status(400).json({message: "Данная задача уже существует"})
             const task = await Task.create({text, inputDataText, outputDataText, userId: req.user.id})
             return res.json({message: "Задача успешно создана", task})
         } catch (e) {
@@ -59,6 +57,20 @@ class TaskController {
             task = await Task.findByPk(req.query.id)
 
             return res.status(200).json({message: "Задача успешно изменена", task})
+        } catch (e) {
+            console.log(e)
+            return res.status(400)
+        }
+    }
+    async deleteTask(req, res) {
+        try {
+            let task = await Task.findByPk(req.query.id)
+            if (!task) {
+                return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
+            }
+            await Task.destroy({where: {id: req.query.id}})
+
+            return res.status(200).json({message: "Задача успешно удалена", task})
         } catch (e) {
             console.log(e)
             return res.status(400)
