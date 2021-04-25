@@ -12,11 +12,11 @@ class UserController {
     }
     async getUserProfile(req, res) {
         try {
-            console.log(req.user)
             const user = await User.findByPk(req.user.id)
             if (!user) {
                 return res.status(404).json({message: `Такой пользователь с id: ${req.query.id} не существует`})
             }
+            delete user.dataValues.password
             return res.status(200).json(user)
         } catch (e) {
             console.log(e)
