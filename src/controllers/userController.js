@@ -10,11 +10,24 @@ class UserController {
             return res.status(400)
         }
     }
+    async getUserById(req, res) {
+        try {
+            const user = await User.findByPk(req.query.id)
+            if (!user) {
+                return res.status(404).json({message: `Такой пользователь с id: ${req.query.id} не существует`})
+            }
+            delete user.dataValues.password
+            return res.status(200).json(user)
+        } catch (e) {
+            console.log(e)
+            return res.status(400)
+        }
+    }
     async getUserProfile(req, res) {
         try {
             const user = await User.findByPk(req.user.id)
             if (!user) {
-                return res.status(404).json({message: `Такой пользователь с id: ${req.query.id} не существует`})
+                return res.status(404).json({message: `Такой пользователь с id: ${req.user.id} не существует`})
             }
             delete user.dataValues.password
             return res.status(200).json(user)
