@@ -9,8 +9,10 @@ class TestController {
                 return res.status(404).json({message: "Такая задача не найдена"})
             }
             const { input, output } = req.body
-            const candidate = await Test.findOne({where: {input}})
-            if (candidate) return res.status(400).json({message: "Данный тест уже существует"})
+            const candidate = await Test.findOne({where: { input: input, taskId: req.query.taskId }})
+            if (candidate) {
+                return res.status(400).json({message: "Данный тест уже существует"})
+            }
             const test = await Test.create({input, output, taskId: Number(req.query.taskId), userId: req.user.id})
             return res.json({message: "Тест успешно создан", test})
         } catch (e) {
@@ -33,18 +35,13 @@ class TestController {
     }
     async updateTest(req, res) {
         try {
-            const task = await Task.findByPk(req.query.taskId)
-            if (!task) {
-                return res.status(404).json({message: "Такая задача не найдена"})
-            }
-
             const { input, output } = req.body
             const candidate = await Test.findOne({where: {input}})
             if (candidate && candidate.id.toString() !== req.query.testId.toString()) {
                 return res.status(400).json({message: "Данный тест уже существует"})
             }
 
-            const test = await Test.update({
+            await Test.update({
                 input: input,
                 output: output,
             }, {where: { id: req.query.testId }})
