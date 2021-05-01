@@ -11,7 +11,11 @@ router.post('/test', [
     check("output", "Выходные данные обязательны").trim().notEmpty(),
     validationMiddleware
 ], TestController.createTest)
-router.put('/test')
+router.put('/test', [
+    check("input", "Входные данные обязательны").trim().notEmpty(),
+    check("output", "Выходные данные обязательны").trim().notEmpty(),
+    validationMiddleware
+], TestController.updateTest)
 router.delete('/test')
 
 module.exports = router
