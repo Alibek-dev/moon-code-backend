@@ -70,7 +70,7 @@ class TaskController {
             }
             await Task.destroy({where: {id: req.query.id}})
 
-            return res.status(200).json({message: "Задача успешно удалена", task})
+            return res.status(200).json({message: "Задача успешно удалена"})
         } catch (e) {
             console.log(e)
             return res.status(400)

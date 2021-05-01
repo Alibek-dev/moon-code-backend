@@ -16,7 +16,7 @@ router.put('/test', [
     check("output", "Выходные данные обязательны").trim().notEmpty(),
     validationMiddleware
 ], TestController.updateTest)
-router.delete('/test')
+router.delete('/test', TestController.deleteTest)
 
 module.exports = router
 

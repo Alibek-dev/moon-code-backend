@@ -51,6 +51,20 @@ class TestController {
             return res.status(400).json({message: "Ошибка при создании теста"})
         }
     }
+    async deleteTest(req, res) {
+        try {
+            let test = await Test.findByPk(req.query.testId)
+            if (!test) {
+                return res.status(404).json({message: `Такой тест с id: ${req.query.testId} не существует`})
+            }
+
+            await Test.destroy({where: {id: req.query.testId}})
+            return res.status(200).json({message: "Тест успешно удален"})
+        } catch (e) {
+            console.log(e)
+            return res.status(400).json({message: "Не удалось удалить тест"})
+        }
+    }
 }
 
 module.exports = new TestController
