@@ -20,7 +20,7 @@ app.use(cors())
 app.use('/api/auth/', authRouter)
 app.use('/api/', authMiddleware, tasksRouter)
 app.use('/api/', authMiddleware, usersRouter)
-app.use('/api/', authMiddleware, testsRouter)
+app.use('/api/task/', authMiddleware, testsRouter)
 
 app.get('/', (req, res) => {
     res.send('Стартовая страница')

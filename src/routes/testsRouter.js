@@ -4,7 +4,7 @@ const TestController = require('../controllers/testController')
 const {check} = require('express-validator')
 const validationMiddleware = require('../middlewaree/validationMiddleware')
 
-router.get('/tests')
+router.get('/tests', TestController.getTestsByTaskId)
 router.get('/test')
 router.post('/test', [
     check("input", "Входные данные обязательны").trim().notEmpty(),

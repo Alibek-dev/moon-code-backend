@@ -1,4 +1,5 @@
 const Test = require('../models/Test')
+const Task = require('../models/Task')
 
 class TestController {
     async createTest(req, res) {
@@ -11,6 +12,19 @@ class TestController {
         } catch (e) {
             console.log(e)
             return res.status(400).json({message: "Ошибка при создании теста"})
+        }
+    }
+    async getTestsByTaskId(req, res) {
+        try {
+            const task = await Task.findByPk(req.query.taskId)
+            if (!task) {
+                return res.status(404).json({message: "Такая задача не найдена"})
+            }
+            const tests = await Test.findAll({where: {taskId: req.query.taskId}})
+            return res.json(tests)
+        } catch (e) {
+            console.log(e)
+            return res.status(400)
         }
     }
 }
