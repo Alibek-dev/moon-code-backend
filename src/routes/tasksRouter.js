@@ -8,6 +8,7 @@ router.get('/task/', TaskController.getTaskById)
 router.get('/tasks', TaskController.getAllTasks)
 
 router.post('/task', [
+    check("tittle", "Заголовок задачи не должен быть пустым").trim().notEmpty(),
     check("text", "Условие задачи не должно быть пустым").trim().notEmpty(),
     check("inputDataText", "Условие входных данных не должно быть пустым").trim().notEmpty(),
     check("outputDataText", "Условие выходных данных не должно быть пустым").trim().notEmpty(),
@@ -15,6 +16,7 @@ router.post('/task', [
 ], TaskController.createTask)
 
 router.put('/task', [
+    check("tittle", "Заголовок задачи не должен быть пустым").trim().notEmpty(),
     check("text", "Условие задачи не должно быть пустым").trim().notEmpty(),
     check("inputDataText", "Условие входных данных не должно быть пустым").trim().notEmpty(),
     check("outputDataText", "Условие выходных данных не должно быть пустым").trim().notEmpty(),
