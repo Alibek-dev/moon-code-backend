@@ -11,6 +11,7 @@ const tasksRouter = require('./src/routes/tasksRouter')
 const authRouter = require('./src/routes/authRouter')
 const usersRouter = require('./src/routes/usersRouter')
 const testsRouter = require('./src/routes/testsRouter')
+const parcelsRouter = require('./src/routes/parcelsRouter')
 
 const app = express()
 app.use(bodyParser.json())
@@ -21,6 +22,7 @@ app.use('/api/auth/', authRouter)
 app.use('/api/', authMiddleware, tasksRouter)
 app.use('/api/', authMiddleware, usersRouter)
 app.use('/api/task/', authMiddleware, testsRouter)
+app.use('/api/', authMiddleware, parcelsRouter)
 
 app.get('/', (req, res) => {
     res.send('Стартовая страница')
