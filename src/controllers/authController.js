@@ -6,7 +6,7 @@ const {secret} = require('../../config')
 
 const generateAccessToken = (id, username, password) => {
     const payload = {id, username, password}
-    return jwt.sign(payload, secret, {expiresIn: "24h"})
+    return jwt.sign(payload, secret)
 }
 
 class AuthController {
@@ -22,8 +22,12 @@ class AuthController {
                 return res.status(400).json({message: 'Пользователь с таким логином уже существует'})
             }
             const hashPassword = bcrypt.hashSync(password, 8)
-            const user = await User.create({firstName, secondName, patronymic, username, password: hashPassword})
-            return res.json({message: "Пользователь успешно зарегестрирован", user})
+            let user = await User.create({firstName, secondName, patronymic, username, password: hashPassword})
+
+            delete user.dataValues.password
+            user.dataValues.token = await generateAccessToken(user.id, user.username, user.password)
+
+            return res.json({message: "Пользователь успешно зарегестрирован", user })
         } catch (e) {
             console.log(e)
             res.status(400).json({message: 'Registration error'})
@@ -40,7 +44,6 @@ class AuthController {
             if (!validPassword) {
                 return res.status(400).json({message: `Введен неверный пароль`})
             }
-            console.log(user)
             const token = generateAccessToken(user.id, user.username, user.password)
             return res.json({token})
 
