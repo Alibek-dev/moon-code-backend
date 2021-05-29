@@ -1,4 +1,5 @@
 const Test = require('../models/Test')
+const Input = require('../models/Input')
 const Task = require('../models/Task')
 
 class TestController {
@@ -8,13 +9,18 @@ class TestController {
             if (!task) {
                 return res.status(404).json({message: "Такая задача не найдена"})
             }
-            const { input, output } = req.body
-            const candidate = await Test.findOne({where: { input: input, taskId: req.query.taskId }})
-            if (candidate) {
-                return res.status(400).json({message: "Данный тест уже существует"})
+            const { inputs, outputType, outputValue } = req.body
+
+            let test = await Test.create({outputType, outputValue})
+            test.setDataValue('inputs', [])
+
+            let input
+            for (const item of inputs) {
+                input = await Input.create({type: item.type, value: item.value})
+                await test.dataValues.inputs.push(input)
             }
-            const test = await Test.create({input, output, taskId: Number(req.query.taskId), userId: req.user.id})
-            return res.json({message: "Тест успешно создан", test})
+
+            return res.json({message: "Тесты успешно созданы", test})
         } catch (e) {
             console.log(e)
             return res.status(400).json({message: "Ошибка при создании теста"})

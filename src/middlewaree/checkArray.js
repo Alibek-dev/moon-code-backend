@@ -5,7 +5,7 @@ module.exports = function (req, res, next) {
 
 
     try {
-        if (!req.items) {
+        if (!req.body.inputs) {
             return res.status(400).json({message: "Входные параметры не должны быть пустыми"})
         }
         next()
