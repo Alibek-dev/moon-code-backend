@@ -1,6 +1,7 @@
 const Test = require('../models/Test')
 const Input = require('../models/Input')
 const Task = require('../models/Task')
+const TestService = require('../service/test.service')
 
 class TestController {
     async createTest(req, res) {
@@ -11,7 +12,7 @@ class TestController {
             }
             const { inputs, outputType, outputValue } = req.body
 
-            let test = await Test.create({outputType, outputValue})
+            let test = await TestService.createTestWithOutputValueAndOutputType({outputType, outputValue})
             test.setDataValue('inputs', [])
 
             let input
@@ -32,7 +33,7 @@ class TestController {
             if (!task) {
                 return res.status(404).json({message: "Такая задача не найдена"})
             }
-            const tests = await Test.findAll({where: {taskId: req.query.taskId}})
+            const tests = await TestService.getAllTestsByTaskId(req.query.taskId)
             return res.json(tests)
         } catch (e) {
             console.log(e)
@@ -42,15 +43,9 @@ class TestController {
     async updateTest(req, res) {
         try {
             const { input, output } = req.body
-            const candidate = await Test.findOne({where: {input}})
-            if (candidate && candidate.id.toString() !== req.query.testId.toString()) {
-                return res.status(400).json({message: "Данный тест уже существует"})
-            }
 
-            await Test.update({
-                input: input,
-                output: output,
-            }, {where: { id: req.query.testId }})
+            await TestService.updateTestById(req.query.testId, {input, output})
+
             return res.json({message: "Тест успешно изменен"})
         } catch (e) {
             console.log(e)
@@ -59,12 +54,12 @@ class TestController {
     }
     async deleteTest(req, res) {
         try {
-            let test = await Test.findByPk(req.query.testId)
+            let test = await TestService.findAndGetTestById(req.query.testId)
             if (!test) {
                 return res.status(404).json({message: `Такой тест с id: ${req.query.testId} не существует`})
             }
 
-            await Test.destroy({where: {id: req.query.testId}})
+            await TestService.destroyTestById(req.query.testId)
             return res.status(200).json({message: "Тест успешно удален"})
         } catch (e) {
             console.log(e)
