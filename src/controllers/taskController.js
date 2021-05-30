@@ -1,9 +1,16 @@
 const Task = require('../models/Task')
+const Rating = require('../models/Rating')
+
+const raitingEnum = {
+    POSITIVE: "POSITIVE",
+    NEGATIVE: "NEGATIVE",
+    NOTHING: "NOTHING"
+}
 
 class TaskController {
     async createTask(req, res) {
         try {
-            const { title, text } = req.body
+            const {title, text} = req.body
             const candidate = await Task.findOne({where: {text}})
             if (candidate) return res.status(400).json({message: "Данная задача уже существует"})
             const task = await Task.create({title, text, userId: req.user.id})
@@ -13,6 +20,7 @@ class TaskController {
             return res.status(400).json({message: "Ошибка при создании задачи"})
         }
     }
+
     async getAllTasks(req, res) {
         try {
             const tasks = await Task.findAll()
@@ -22,6 +30,7 @@ class TaskController {
             return res.status(400).json({message: "Произошла ошибка, обратитесь к Системному Администратору"})
         }
     }
+
     async getTaskById(req, res) {
         try {
             const task = await Task.findByPk(req.query.id)
@@ -34,6 +43,7 @@ class TaskController {
             return res.status(400)
         }
     }
+
     async updateTask(req, res) {
         try {
             let task = await Task.findByPk(req.query.id)
@@ -41,7 +51,7 @@ class TaskController {
                 return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
             }
 
-            const { title, text } = req.body
+            const {title, text} = req.body
             const candidate = await Task.findOne({where: {title}})
 
             if (candidate && candidate.id.toString() !== req.query.id.toString()) {
@@ -51,7 +61,7 @@ class TaskController {
             await Task.update({
                 title,
                 text,
-            }, {where: { id: req.query.id }})
+            }, {where: {id: req.query.id}})
 
             task = await Task.findByPk(req.query.id)
 
@@ -61,6 +71,7 @@ class TaskController {
             return res.status(400)
         }
     }
+
     async deleteTask(req, res) {
         try {
             let task = await Task.findByPk(req.query.id)
@@ -73,6 +84,44 @@ class TaskController {
         } catch (e) {
             console.log(e)
             return res.status(400).json({message: "Ошибка при удалении задачи"})
+        }
+    }
+
+    async calcRaiting(req, res) {
+        try {
+            const {value, taskId} = req.query
+
+            let rating = await Rating.findOne({where: {userId: req.user.id, taskId}})
+            if (!rating) {
+                rating = await Rating.create({value, taskId, userId: req.user.id})
+                return res.status(200).json({message: "Рейтинг успешно поставлен", rating})
+            }
+
+            if (value !== raitingEnum.NOTHING) {
+                await Rating.update({value}, {
+                        where: {
+                            taskId,
+                            userId: req.user.id
+                        }
+                    }
+                )
+                return res.status(200).json({message: "Рейтинг изменен"})
+            }
+
+            if (req.body.value !== raitingEnum.NOTHING) {
+                await Rating.destroy({
+                    where: {
+                        taskId,
+                        userId: req.user.id
+                    }
+                })
+                return res.status(200).json({message: "Голос снят"})
+            }
+
+            return res.status(400).json({message: "Что-то пошло не так"})
+        } catch (e) {
+            console.log(e)
+            return res.status(400).json({message: "Не удалось установить рейтинг"})
         }
     }
 }
