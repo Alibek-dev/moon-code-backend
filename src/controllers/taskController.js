@@ -41,15 +41,15 @@ class TaskController {
                 return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
             }
 
-            const { tittle: title, text } = req.body
-            const candidate = await Task.findOne({where: {text}})
+            const { title, text } = req.body
+            const candidate = await Task.findOne({where: {title}})
 
             if (candidate && candidate.id.toString() !== req.query.id.toString()) {
                 return res.status(400).json({message: "Данная задача уже существует"})
             }
 
             await Task.update({
-                title: title,
+                title,
                 text,
             }, {where: { id: req.query.id }})
 
@@ -72,7 +72,7 @@ class TaskController {
             return res.status(200).json({message: "Задача успешно удалена"})
         } catch (e) {
             console.log(e)
-            return res.status(400)
+            return res.status(400).json({message: "Ошибка при удалении задачи"})
         }
     }
 }
