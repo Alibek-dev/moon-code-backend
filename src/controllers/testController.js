@@ -1,5 +1,3 @@
-const Test = require('../models/Test')
-const Input = require('../models/Input')
 const Task = require('../models/Task')
 const TestService = require('../service/test.service')
 
@@ -12,14 +10,20 @@ class TestController {
             }
             const { inputs, outputType, outputValue } = req.body
 
-            let test = await TestService.createTestWithOutputValueAndOutputType({outputType, outputValue})
-            test.setDataValue('inputs', [])
+            let test = await TestService.createTestWithOutputValueAndOutputType({
+                outputType,
+                outputValue,
+                taskId: req.query.taskId,
+                userId: req.user.id
+            })
 
             let input
+            let m = []
             for (const item of inputs) {
-                input = await Input.create({type: item.type, value: item.value})
-                await test.dataValues.inputs.push(input)
+                input = await TestService.createInput({type: item.type, value: item.value, testId: test.getDataValue('id')})
+                m.push(input)
             }
+            await test.setDataValue('inputs', m)
 
             return res.json({message: "Тесты успешно созданы", test})
         } catch (e) {
@@ -42,9 +46,9 @@ class TestController {
     }
     async updateTest(req, res) {
         try {
-            const { input, output } = req.body
+            const { inputs, outputType, outputValue } = req.body
 
-            await TestService.updateTestById(req.query.testId, {input, output})
+            await TestService.updateTestById(req.query.testId, {inputs, outputType, outputValue})
 
             return res.json({message: "Тест успешно изменен"})
         } catch (e) {
