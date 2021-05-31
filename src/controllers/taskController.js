@@ -1,5 +1,4 @@
 const Task = require('../models/Task')
-const Rating = require('../models/Rating')
 const RatingEnum = require('../types/Enums')
 const RatingService = require('../service/rating.service')
 
@@ -22,7 +21,7 @@ class TaskController {
         try {
             let tasks = await Task.findAll()
             for (let task of tasks) {
-                task.setDataValue('rating', await RatingService.calculateRatingForTask(task))
+                task.setDataValue('rating', await RatingService.calculateRatingForTask(task, req.user.id))
             }
             return res.status(200).json({tasks})
         } catch (e) {
@@ -37,7 +36,7 @@ class TaskController {
             if (!task) {
                 return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
             }
-            task.setDataValue('rating', await RatingService.calculateRatingForTask(task))
+            task.setDataValue('rating', await RatingService.calculateRatingForTask(task, req.user.id))
             return res.status(200).json(task)
         } catch (e) {
             console.log(e)
@@ -91,25 +90,35 @@ class TaskController {
     async setRaiting(req, res) {
         try {
             const {value, taskId} = req.query
+            const task = await Task.findByPk(taskId)
 
             let rating = await RatingService.findAndGetRatingByTaskIdAndUserId(taskId, req.user.id)
             if (!rating && value !== RatingEnum.NOTHING) {
-                rating = await RatingService.createRating({
+                await RatingService.createRating({
                     value,
                     taskId,
                     userId: req.user.id
                 })
-                return res.status(200).json({message: "Рейтинг успешно поставлен", rating})
+                return res.status(200).json({
+                    message: "Рейтинг успешно поставлен",
+                    rating: await RatingService.calculateRatingForTask(task, req.user.id)
+                })
             }
 
             if (value !== RatingEnum.NOTHING) {
                 await RatingService.updateRatingByTaskIdAndUserId(taskId, req.user.id, {value})
-                return res.status(200).json({message: "Рейтинг изменен"})
+                return res.status(200).json({
+                    message: "Рейтинг изменен",
+                    rating: await RatingService.calculateRatingForTask(task, req.user.id)
+                })
             }
 
             if (req.body.value !== RatingEnum.NOTHING) {
                 await RatingService.destroyRatingByTaskIdAndUserId(taskId, req.user.id)
-                return res.status(200).json({message: "Голос снят"})
+                return res.status(200).json({
+                    message: "Голос снят",
+                    rating: await RatingService.calculateRatingForTask(task, req.user.id)
+                })
             }
 
             return res.status(400).json({message: "Что-то пошло не так"})

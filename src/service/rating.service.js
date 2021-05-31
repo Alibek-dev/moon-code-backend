@@ -2,19 +2,31 @@ const Rating = require('../models/Rating')
 const RatingEnum = require('../types/Enums')
 
 class RatingService {
-    async calculateRatingForTask(task) {
+    async calculateRatingForTask(task, userId) {
         let ratings = await this.getAllRatingsByTaskId(task.id)
 
         let positiveCount = 0
         let negativeCount = 0
+        let userIsVoted = false
+        let userVatedValue = null
         ratings.forEach(rating => {
             if (rating.dataValues.value === RatingEnum.POSITIVE) {
                 positiveCount++
             } else {
                 negativeCount--
             }
+            if (rating.dataValues.userId === userId) {
+                userIsVoted = true
+                userVatedValue = rating.dataValues.value
+            }
         })
-        return { positiveCount, negativeCount, ratingNumber: positiveCount + negativeCount }
+        return {
+            positiveCount,
+            negativeCount,
+            ratingNumber: positiveCount + negativeCount,
+            userIsVoted,
+            userVatedValue
+        }
     }
 
     async getAllRatingsByTaskId(id) {
