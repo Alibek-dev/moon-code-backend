@@ -1,11 +1,8 @@
 const Task = require('../models/Task')
 const Rating = require('../models/Rating')
+const RatingEnum = require('../types/Enums')
+const RatingService = require('../service/rating.service')
 
-const raitingEnum = {
-    POSITIVE: "POSITIVE",
-    NEGATIVE: "NEGATIVE",
-    NOTHING: "NOTHING"
-}
 
 class TaskController {
     async createTask(req, res) {
@@ -23,7 +20,10 @@ class TaskController {
 
     async getAllTasks(req, res) {
         try {
-            const tasks = await Task.findAll()
+            let tasks = await Task.findAll()
+            for (let task of tasks) {
+                task.setDataValue('rating', await RatingService.calculateRatingForTask(task))
+            }
             return res.status(200).json({tasks})
         } catch (e) {
             console.log(e)
@@ -37,6 +37,7 @@ class TaskController {
             if (!task) {
                 return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
             }
+            task.setDataValue('rating', await RatingService.calculateRatingForTask(task))
             return res.status(200).json(task)
         } catch (e) {
             console.log(e)
@@ -87,7 +88,7 @@ class TaskController {
         }
     }
 
-    async calcRaiting(req, res) {
+    async setRaiting(req, res) {
         try {
             const {value, taskId} = req.query
 
@@ -97,7 +98,7 @@ class TaskController {
                 return res.status(200).json({message: "Рейтинг успешно поставлен", rating})
             }
 
-            if (value !== raitingEnum.NOTHING) {
+            if (value !== RatingEnum.NOTHING) {
                 await Rating.update({value}, {
                         where: {
                             taskId,
@@ -108,7 +109,7 @@ class TaskController {
                 return res.status(200).json({message: "Рейтинг изменен"})
             }
 
-            if (req.body.value !== raitingEnum.NOTHING) {
+            if (req.body.value !== RatingEnum.NOTHING) {
                 await Rating.destroy({
                     where: {
                         taskId,

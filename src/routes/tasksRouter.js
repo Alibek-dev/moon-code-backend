@@ -20,7 +20,7 @@ router.put('/task', [
 ], TaskController.updateTask)
 router.delete('/task/', TaskController.deleteTask)
 
-router.put('/task/rating', TaskController.calcRaiting)
+router.put('/task/rating', TaskController.setRaiting)
 
 module.exports = router
 
