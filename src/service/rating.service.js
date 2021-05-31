@@ -20,6 +20,38 @@ class RatingService {
     async getAllRatingsByTaskId(id) {
         return Rating.findAll({where: {taskId: id}})
     }
+
+    async findAndGetRatingByTaskIdAndUserId(taskId, userId) {
+        return await Rating.findOne({where: {userId, taskId}})
+    }
+
+    async createRating(data) {
+        const {value, taskId, userId} = data
+        return await Rating.create({
+            value,
+            taskId,
+            userId
+        })
+    }
+
+    async destroyRatingByTaskIdAndUserId(taskId, userId) {
+        return await Rating.destroy({
+            where: {
+                taskId,
+                userId
+            }
+        })
+    }
+
+    async updateRatingByTaskIdAndUserId(taskId, userId, data) {
+        return await Rating.update({value: data.value}, {
+                where: {
+                    taskId,
+                    userId,
+                }
+            }
+        )
+    }
 }
 
 module.exports = new RatingService

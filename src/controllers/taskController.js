@@ -92,30 +92,23 @@ class TaskController {
         try {
             const {value, taskId} = req.query
 
-            let rating = await Rating.findOne({where: {userId: req.user.id, taskId}})
-            if (!rating) {
-                rating = await Rating.create({value, taskId, userId: req.user.id})
+            let rating = await RatingService.findAndGetRatingByTaskIdAndUserId(taskId, req.user.id)
+            if (!rating && value !== RatingEnum.NOTHING) {
+                rating = await RatingService.createRating({
+                    value,
+                    taskId,
+                    userId: req.user.id
+                })
                 return res.status(200).json({message: "Рейтинг успешно поставлен", rating})
             }
 
             if (value !== RatingEnum.NOTHING) {
-                await Rating.update({value}, {
-                        where: {
-                            taskId,
-                            userId: req.user.id
-                        }
-                    }
-                )
+                await RatingService.updateRatingByTaskIdAndUserId(taskId, req.user.id, {value})
                 return res.status(200).json({message: "Рейтинг изменен"})
             }
 
             if (req.body.value !== RatingEnum.NOTHING) {
-                await Rating.destroy({
-                    where: {
-                        taskId,
-                        userId: req.user.id
-                    }
-                })
+                await RatingService.destroyRatingByTaskIdAndUserId(taskId, req.user.id)
                 return res.status(200).json({message: "Голос снят"})
             }
 
