@@ -8,7 +8,7 @@ class RatingService {
         let positiveCount = 0
         let negativeCount = 0
         let userIsVoted = false
-        let userVatedValue = null
+        let userVotedValue = null
         ratings.forEach(rating => {
             if (rating.dataValues.value === RatingEnum.POSITIVE) {
                 positiveCount++
@@ -17,7 +17,7 @@ class RatingService {
             }
             if (rating.dataValues.userId === userId) {
                 userIsVoted = true
-                userVatedValue = rating.dataValues.value
+                userVotedValue = rating.dataValues.value
             }
         })
         return {
@@ -25,7 +25,7 @@ class RatingService {
             negativeCount,
             ratingNumber: positiveCount + negativeCount,
             userIsVoted,
-            userVatedValue
+            userVatedValue: userVotedValue
         }
     }
 
