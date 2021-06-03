@@ -1,5 +1,6 @@
 const Test = require('../models/Test')
 const Input = require('../models/Input')
+const InputsTypes = require('../types/Enums')
 
 
 class TestService {
@@ -14,8 +15,13 @@ class TestService {
     }
 
     async findAndGetAllInputsByTestId(testId) {
-        console.log(testId)
-        return await Input.findAll({where: {testId}})
+        let inputs = await Input.findAll({where: {testId}})
+        for (let input of inputs) {
+            if (input.dataValues.type.toUpperCase() === InputsTypes.BOOLEAN) {
+                await input.setDataValue('value', Boolean(input.dataValues.value))
+            }
+        }
+        return inputs
     }
 
     async createTestWithOutputValueAndOutputType(data) {

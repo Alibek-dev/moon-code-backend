@@ -1,11 +1,11 @@
 const Parcel = require('../models/Parcel')
+const TestingService = require('../service/testing.service')
 
 const ivm = require('isolated-vm');
 
 class ParcelController {
     async testingCode(req, res) {
         try {
-
 
             return res.status(200).json("Хоп")
         } catch (e) {
