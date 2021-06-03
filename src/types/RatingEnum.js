@@ -3,9 +3,3 @@ module.exports = RatingEnum = {
     NEGATIVE: "NEGATIVE",
     NOTHING: "NOTHING"
 }
-
-module.exports = InputsTypes = {
-    BOOLEAN: "BOOLEAN",
-    STRING: "STRING",
-    NUMBER: "NUMBER",
-}

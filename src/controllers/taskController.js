@@ -1,5 +1,5 @@
 const Task = require('../models/Task')
-const RatingEnum = require('../types/Enums')
+const RatingEnum = require('../types/RatingEnum')
 const RatingService = require('../service/rating.service')
 
 
@@ -93,7 +93,7 @@ class TaskController {
             const task = await Task.findByPk(taskId)
 
             let rating = await RatingService.findAndGetRatingByTaskIdAndUserId(taskId, req.user.id)
-            if (!rating && value !== RatingEnum.NOTHING) {
+            if (!rating && (value === RatingEnum.POSITIVE || value === RatingEnum.NEGATIVE)) {
                 await RatingService.createRating({
                     value,
                     taskId,
@@ -105,7 +105,7 @@ class TaskController {
                 })
             }
 
-            if (value !== RatingEnum.NOTHING) {
+            if (value === RatingEnum.POSITIVE || value === RatingEnum.NEGATIVE) {
                 await RatingService.updateRatingByTaskIdAndUserId(taskId, req.user.id, {value})
                 return res.status(200).json({
                     message: "Рейтинг изменен",
@@ -113,7 +113,7 @@ class TaskController {
                 })
             }
 
-            if (req.body.value !== RatingEnum.NOTHING) {
+            if (value === RatingEnum.NOTHING) {
                 await RatingService.destroyRatingByTaskIdAndUserId(taskId, req.user.id)
                 return res.status(200).json({
                     message: "Голос снят",
@@ -121,7 +121,7 @@ class TaskController {
                 })
             }
 
-            return res.status(400).json({message: "Что-то пошло не так"})
+            return res.status(400).json({message: "Указан не правильный value для рейтинга"})
         } catch (e) {
             console.log(e)
             return res.status(400).json({message: "Не удалось установить рейтинг"})

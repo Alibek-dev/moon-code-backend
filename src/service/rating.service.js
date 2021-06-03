@@ -1,5 +1,5 @@
 const Rating = require('../models/Rating')
-const RatingEnum = require('../types/Enums')
+const RatingEnum = require('../types/RatingEnum')
 
 class RatingService {
     async calculateRatingForTask(task, userId) {

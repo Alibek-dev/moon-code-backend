@@ -1,6 +1,6 @@
 const Test = require('../models/Test')
 const Input = require('../models/Input')
-const InputsTypes = require('../types/Enums')
+const InputsTypes = require('../types/InputsTypesEnums')
 
 
 class TestService {
