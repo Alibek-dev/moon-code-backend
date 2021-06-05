@@ -1,7 +1,8 @@
 const Task = require('../models/Task')
 const RatingEnum = require('../types/RatingEnum')
 const RatingService = require('../service/rating.service')
-const FavoriteTask = require('../models/FavoriteTask')
+
+const FavoriteService = require('../service/favorite.service')
 
 
 class TaskController {
@@ -20,9 +21,31 @@ class TaskController {
 
     async getAllTasks(req, res) {
         try {
+            const {favorites} = req.query
+            if (favorites === "true") {
+                const favorites = await FavoriteService.findAllFavoriteTasks(req.user.id)
+                let tasks = []
+                for (let favorite of favorites) {
+                    let task = await Task.findByPk(favorite.dataValues.taskId)
+
+                    await FavoriteService.findOneFavoriteTask(task.dataValues.id, req.user.id) ?
+                        task.setDataValue('inBookmark', true) :
+                        task.setDataValue('inBookmark', false)
+
+                    tasks.push(task)
+                }
+
+                return res.status(200).json({tasks})
+            }
+
             let tasks = await Task.findAll()
             for (let task of tasks) {
                 task.setDataValue('rating', await RatingService.calculateRatingForTask(task, req.user.id))
+
+                await FavoriteService.findOneFavoriteTask(task.dataValues.id, req.user.id) ?
+                    task.setDataValue('inBookmark', true) :
+                    task.setDataValue('inBookmark', false)
+
             }
             return res.status(200).json({tasks})
         } catch (e) {
@@ -38,6 +61,12 @@ class TaskController {
                 return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
             }
             task.setDataValue('rating', await RatingService.calculateRatingForTask(task, req.user.id))
+
+            await FavoriteService.findOneFavoriteTask(task.dataValues.id, req.user.id) ?
+                task.setDataValue('inBookmark', true) :
+                task.setDataValue('inBookmark', false)
+
+
             return res.status(200).json(task)
         } catch (e) {
             console.log(e)
@@ -129,6 +158,8 @@ class TaskController {
         }
     }
 
+
+
     async setFavorite(req, res) {
         try {
             const {inBookmark, taskId} = req.query
@@ -137,18 +168,18 @@ class TaskController {
                 return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
             }
 
-            const favoriteTask = await FavoriteTask.findOne({where: {taskId, userId: req.user.id}})
+            const favoriteTask = await FavoriteService.findOneFavoriteTask(taskId, req.user.id)
             if (inBookmark.toUpperCase() === 'TRUE') {
                 if (favoriteTask) {
                     return res.status(400).json({message: "Задача уже в закладках"})
                 }
 
-                await FavoriteTask.create({taskId, userId: req.user.id})
+                await FavoriteService.createFavoriteTask(taskId, req.user.id)
                 return res.status(200).json({message: "Задача успешно добавлена в закладки"})
             }
             if (inBookmark.toUpperCase() === 'FALSE') {
                 if (favoriteTask) {
-                    await FavoriteTask.destroy({where: {taskId, userId: req.user.id}})
+                    await FavoriteService.destroyFavoriteTask(taskId, req.user.id)
                     return res.status(200).json({message: "Задача успешно убрана из закладок"})
                 } else {
                     return res.status(404).json({message: "Задачи нет в закладках"})
