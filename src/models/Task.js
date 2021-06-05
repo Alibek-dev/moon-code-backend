@@ -3,6 +3,7 @@ const DataTypes = require('sequelize')
 const Test = require('./Test')
 const Parcel = require('./Parcel')
 const Rating = require('./Rating')
+const FavoriteTask = require('./FavoriteTask')
 
 const Task = db.define('task', {
     title: {type: DataTypes.STRING, unique: true, required: true},
@@ -16,6 +17,9 @@ Task.hasMany(Parcel, {
     onDelete: 'cascade'
 })
 Task.hasMany(Rating, {
+    onDelete: 'cascade'
+})
+Task.hasMany(FavoriteTask, {
     onDelete: 'cascade'
 })
 

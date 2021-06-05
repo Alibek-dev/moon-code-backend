@@ -4,6 +4,7 @@ const Task = require('./Task')
 const Test = require('./Test')
 const Parcel = require('./Parcel')
 const Rating = require('./Rating')
+const FavoriteTask = require('./FavoriteTask')
 
 const User = db.define('user', {
     username: {type: DataTypes.STRING, unique: true, required: true},
@@ -23,6 +24,9 @@ User.hasMany(Parcel, {
     onDelete: 'cascade'
 })
 User.hasMany(Rating, {
+    onDelete: 'cascade'
+})
+User.hasMany(FavoriteTask, {
     onDelete: 'cascade'
 })
 

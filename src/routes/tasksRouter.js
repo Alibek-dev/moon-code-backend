@@ -22,5 +22,7 @@ router.delete('/task/', TaskController.deleteTask)
 
 router.put('/task/rating', TaskController.setRaiting)
 
+router.put('/task/favorite', TaskController.setFavorite)
+
 module.exports = router
 

@@ -1,6 +1,7 @@
 const Task = require('../models/Task')
 const RatingEnum = require('../types/RatingEnum')
 const RatingService = require('../service/rating.service')
+const FavoriteTask = require('../models/FavoriteTask')
 
 
 class TaskController {
@@ -125,6 +126,39 @@ class TaskController {
         } catch (e) {
             console.log(e)
             return res.status(400).json({message: "Не удалось установить рейтинг"})
+        }
+    }
+
+    async setFavorite(req, res) {
+        try {
+            const {inBookmark, taskId} = req.query
+            const task = await Task.findByPk(taskId)
+            if (!task) {
+                return res.status(404).json({message: `Такая задача с id: ${req.query.id} не существует`})
+            }
+
+            const favoriteTask = await FavoriteTask.findOne({where: {taskId, userId: req.user.id}})
+            if (inBookmark.toUpperCase() === 'TRUE') {
+                if (favoriteTask) {
+                    return res.status(400).json({message: "Задача уже в закладках"})
+                }
+
+                await FavoriteTask.create({taskId, userId: req.user.id})
+                return res.status(200).json({message: "Задача успешно добавлена в закладки"})
+            }
+            if (inBookmark.toUpperCase() === 'FALSE') {
+                if (favoriteTask) {
+                    await FavoriteTask.destroy({where: {taskId, userId: req.user.id}})
+                    return res.status(200).json({message: "Задача успешно убрана из закладок"})
+                } else {
+                    return res.status(404).json({message: "Задачи нет в закладках"})
+                }
+            }
+
+
+        } catch (e) {
+            console.log(e)
+            return res.status(400).json({message: "Не удалось добавить в добавить/убрать с закладок"})
         }
     }
 }
