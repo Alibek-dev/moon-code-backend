@@ -1,6 +1,7 @@
 const db = require('../modules/connectionDB')
 const DataTypes = require('sequelize')
 
+const TestResult = require('./TestResult')
 const Input = require('./Input')
 
 const Test = db.define('test', {
@@ -9,6 +10,9 @@ const Test = db.define('test', {
 })
 
 Test.hasMany(Input, {
+    onDelete: 'cascade'
+})
+Test.hasMany(TestResult, {
     onDelete: 'cascade'
 })
 

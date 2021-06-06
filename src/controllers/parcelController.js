@@ -27,6 +27,7 @@ class ParcelController {
                 const result = await TestingService.startTesting(code, test.dataValues)
                 const testResult = await TestResult.create({
                     parcelId: parcel.id,
+                    testId: test.dataValues.id,
                     isPassed: result.isPassed,
                     errorMessage: result.errorMessage
                 })
@@ -43,8 +44,30 @@ class ParcelController {
         }
     }
 
-    getAllParcels(req, res) {
+    async getAllParcels(req, res) {
+        try {
+            let parcels = await Parcel.findAll({where: {taskId: req.query.taskId, userId: req.user.id}})
+            return res.status(200).json(parcels)
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
+    async getParcel(req, res) {
+        try{
+            let parcel = await Parcel.findByPk(req.query.parcelId)
+            let tests = await TestService.getAllTestsByTaskId(req.query.taskId)
+            for (let test of tests) {
+                const testResult = await TestResult.findOne({where: {testId: test.dataValues.id, parcelId: parcel.getDataValue('id')}})
+                test.dataValues.isPassed = testResult.getDataValue('isPassed')
+                test.dataValues.errorMessage = testResult.getDataValue('errorMessage')
+            }
+            parcel.setDataValue("tests", tests)
+            return res.status(200).json(parcel)
+        } catch (e) {
+            console.log(e)
+            return res.status(404)
+        }
     }
 }
 
