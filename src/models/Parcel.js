@@ -1,12 +1,20 @@
 const db = require('../modules/connectionDB')
 const DataTypes = require('sequelize')
+const TestResult = require('./TestResult')
 
-const Parsel = db.define('task', {
-    code: {type: DataTypes.STRING, required: true},
-    isPassedAllTests: {type: DataTypes.BOOLEAN, required: true},
+const Parcel = db.define('parcel', {
+    code: {type: DataTypes.TEXT, required: true},
+
+    /**
+     * NULL - ничего
+     * TESTING - идёт тестирование
+     * DONE - закончил проверять все тесты
+     */
     status: {type: DataTypes.STRING},
-    taskId: {type: DataTypes.NUMBER, required: true},
-    userId: {type: DataTypes.NUMBER, required: true},
 })
 
-module.exports = Parsel
+Parcel.hasMany(TestResult, {
+    onDelete: 'cascade'
+})
+
+module.exports = Parcel

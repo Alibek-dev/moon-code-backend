@@ -1,45 +1,37 @@
-const Parcel = require('../models/Parcel')
 const ivm = require('isolated-vm');
 
 class TestingService {
-    async startTesting(req, res) {
+    async startTesting(code, test) {
+
         const isolate = new ivm.Isolate({ memoryLimit: 128 });
         const context = isolate.createContextSync();
         const jail = context.global;
 
-        const props = {
-            a: 1,
-            b: 3,
-            c: "Строка"
+        let inputs = []
+        for(let input of test.inputs) {
+            inputs.push(input.value)
         }
 
-        jail.setSync('output', function(...args) {
-            console.log(...args);
+        let result = null
+
+        jail.setSync('output', function(arg) {
+            result = arg.toString()
         });
         jail.setSync('input', function (property) {
-            return props[property]
+            return inputs[property - 1]
         });
 
-        context.evalSync('output("Вот это")');
+        let isPassed = false
+        let errorMessage = ""
 
-        const hostile = isolate.compileScriptSync(`
-                c = input('c')
-                output(c)   
-                const storage = [];
-                const twoMegabytes = 1024 * 1024 * 2;
-                while (true) {
-                    const array = new Uint8Array(twoMegabytes);
-                    for (let ii = 0; ii < twoMegabytes; ii += 4096) {
-                        array[ii] = 1; // we have to put something in the array to flush to real memory
-                    }
-                    storage.push(array);
-                    output('I\\'ve wasted '+ (storage.length * 2)+ 'MB');
-                }
-            `);
-        await hostile.run(context).catch(err => console.error(err));
+        const hostile = isolate.compileScriptSync(code);
+        await hostile
+            .run(context)
+            .catch(err => errorMessage = err.toString());
+        isPassed = result === test.outputValue.toString()
+        return {isPassed, errorMessage}
 
-        console.log("Прекол")
     }
 }
 
-module.exports = TestingService
+module.exports = new TestingService
