@@ -24,7 +24,14 @@ class TestingService {
         let isPassed = false
         let errorMessage = ""
 
-        const hostile = isolate.compileScriptSync(code);
+        try {
+            const hostile = isolate.compileScriptSync(code)
+        } catch (e) {
+            errorMessage = e.toString()
+            return {isPassed, errorMessage}
+        }
+
+
         await hostile
             .run(context)
             .catch(err => errorMessage = err.toString());
