@@ -27,6 +27,7 @@ class TaskController {
                 let tasks = []
                 for (let favorite of favorites) {
                     let task = await Task.findByPk(favorite.dataValues.taskId)
+                    task.setDataValue('rating', await RatingService.calculateRatingForTask(task, req.user.id))
 
                     await FavoriteService.findOneFavoriteTask(task.dataValues.id, req.user.id) ?
                         task.setDataValue('inBookmark', true) :
