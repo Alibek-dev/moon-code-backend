@@ -11,7 +11,7 @@ class TestService {
             const inputs = await this.findAndGetAllInputsByTestId(test.getDataValue("id"))
             await test.setDataValue('inputs', inputs)
             if (test.dataValues.outputType.toUpperCase() === InputsTypes.BOOLEAN) {
-                await test.setDataValue('outputValue', test.dataValues.outputValue === "1" ? true : false)
+                await test.setDataValue('outputValue', test.dataValues.outputValue === "true" ? true : false)
             }
         }
         return tests
@@ -21,7 +21,7 @@ class TestService {
         let inputs = await Input.findAll({where: {testId}})
         for (let input of inputs) {
             if (input.dataValues.type.toUpperCase() === InputsTypes.BOOLEAN) {
-                await input.setDataValue('value', input.dataValues.value === "1" ? true : false)
+                await input.setDataValue('value', input.dataValues.value === "true" ? true : false)
             }
         }
         return inputs
