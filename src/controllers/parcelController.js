@@ -9,7 +9,7 @@ class ParcelController {
     async testingCode(req, res) {
         try {
 
-            const parcel = await Parcel.create({
+            let parcel = await Parcel.create({
                 code: req.body.code,
                 taskId: req.query.taskId,
                 userId: req.user.id,
@@ -37,7 +37,11 @@ class ParcelController {
 
             await Parcel.update({status: "DONE"},{where: {id: parcel.getDataValue('id')}})
 
-            return res.status(200).json(tests)
+            parcel = await await Parcel.findByPk(parcel.getDataValue('id'))
+
+            await parcel.setDataValue('tests', tests)
+
+            return res.status(200).json(parcel)
         } catch (e) {
             console.log(e)
             return res.status(400)
