@@ -6,6 +6,7 @@ const validationMiddleware = require('../middlewaree/validationMiddleware')
 
 router.get('/task/', TaskController.getTaskById)
 router.get('/tasks', TaskController.getAllTasks)
+router.get('/tasks/parcels', TaskController.getAllTasksWithParcels)
 
 router.post('/task', [
     check("title", "Заголовок задачи не должен быть пустым").trim().notEmpty(),

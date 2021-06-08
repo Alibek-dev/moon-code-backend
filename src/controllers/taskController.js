@@ -1,4 +1,5 @@
 const Task = require('../models/Task')
+const Parcel = require('../models/Parcel')
 const RatingEnum = require('../types/RatingEnum')
 const RatingService = require('../service/rating.service')
 
@@ -40,6 +41,35 @@ class TaskController {
             }
 
             let tasks = await Task.findAll()
+            for (let task of tasks) {
+                task.setDataValue('rating', await RatingService.calculateRatingForTask(task, req.user.id))
+
+                await FavoriteService.findOneFavoriteTask(task.dataValues.id, req.user.id) ?
+                    task.setDataValue('inBookmark', true) :
+                    task.setDataValue('inBookmark', false)
+
+            }
+            return res.status(200).json({tasks})
+        } catch (e) {
+            console.log(e)
+            return res.status(400).json({message: "Произошла ошибка, обратитесь к Системному Администратору"})
+        }
+    }
+
+    async getAllTasksWithParcels(req, res) {
+        try {
+            let parcels = await Parcel.findAll({where: {userId: req.user.id}})
+            let tasks = []
+            let tasksKeys = new Set()
+
+            for (let parcel of parcels) {
+                const task = await Task.findByPk(parcel.getDataValue('taskId'))
+                if (!tasksKeys.has(task.getDataValue('id'))) {
+                    tasks.push(task)
+                    tasksKeys.add(task.getDataValue('id'))
+                }
+            }
+
             for (let task of tasks) {
                 task.setDataValue('rating', await RatingService.calculateRatingForTask(task, req.user.id))
 
