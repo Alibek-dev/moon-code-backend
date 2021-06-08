@@ -51,15 +51,10 @@ class ParcelController {
     async getAllParcels(req, res) {
         try {
             let parcels = await Parcel.findAll({where: {taskId: req.query.taskId, userId: req.user.id}})
-            for (let parcel of parcels) {
-                const testResult = await TestResult.findByPk(parcel.dataValues.id)
-                parcel.dataValues.isPassed = testResult.getDataValue('isPassed')
-                parcel.dataValues.errorMessage = testResult.getDataValue('errorMessage')
-            }
             return res.status(200).json(parcels)
         } catch (e) {
-            return res.status(400).json()
             console.log(e)
+            return res.status(400).json(parcels)
         }
     }
 
